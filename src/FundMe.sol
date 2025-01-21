@@ -1,7 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
+// ...existing code...
+/**
+ * @title A Sample FundMe contract
+ * @author Nouman (Nomi)
+ * @notice You can use this contract to create a raffle
+ * @dev Implements Chainlink VRFv2.5
+ */
+// ...existing code...
 
-// Note: The AggregatorV3Interface might be at a different location than what was in the video!
 import {AggregatorV3Interface} from "@chainlink/contracts/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 import {PriceConverter} from "./PriceConverter.sol";
 
@@ -54,6 +61,7 @@ contract FundMe {
             s_addressToAmountFunded[funder] = 0;
         }
         s_funders = new address[](0);
+        // sending balance to the owner by using call function.
         // // transfer
         // payable(msg.sender).transfer(address(this).balance);
 
@@ -103,12 +111,3 @@ contract FundMe {
         return i_owner;
     }
 }
-
-// Concepts we didn't cover yet (will cover in later sections)
-// 1. Enum
-// 2. Events
-// 3. Try / Catch
-// 4. Function Selector
-// 5. abi.encode / decode
-// 6. Hash with keccak256
-// 7. Yul / Assembly

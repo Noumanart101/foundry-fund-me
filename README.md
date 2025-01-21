@@ -20,7 +20,6 @@
   - [Estimate gas](#estimate-gas)
 - [Formatting](#formatting)
 - [Additional Info:](#additional-info)
-  - [Let's talk about what "Official" means](#lets-talk-about-what-official-means)
   - [Summary](#summary)
 - [Thank you](#thank-you)
 
@@ -39,8 +38,7 @@
 
 ```
 git clone https://github.com/Noumanart101/foundry-fund-me
-cd foundry-fund-me-cu
-make
+cd foundry-fund-me
 ```
 
 ### Optional Gitpod
@@ -57,14 +55,10 @@ forge script script/DeployFundMe.s.sol
 
 ## Testing
 
-We talk about 4 test tiers in the video. 
-
 1. Unit
 2. Integration
 3. Forked
 4. Staging
-
-This repo we cover #1 and #3. 
 
 
 ```
@@ -76,9 +70,7 @@ or
 ```
 // Only run test functions matching the specified regex pattern.
 
-"forge test -m testFunctionName" is deprecated. Please use 
-
-forge test --match-test testFunctionName
+forge test --mt testFunctionName
 ```
 
 or
@@ -209,18 +201,11 @@ forge fmt
 ```
 
 # Additional Info:
-Some users were having a confusion that whether Chainlink-brownie-contracts is an official Chainlink repository or not. Here is the info.
 Chainlink-brownie-contracts is an official repo. The repository is owned and maintained by the chainlink team for this very purpose, and gets releases from the proper chainlink release process. You can see it's still the `smartcontractkit` org as well.
 
 https://github.com/smartcontractkit/chainlink-brownie-contracts
 
-## Let's talk about what "Official" means
-The "official" release process is that chainlink deploys it's packages to [npm](https://www.npmjs.com/package/@chainlink/contracts). So technically, even downloading directly from `smartcontractkit/chainlink` is wrong, because it could be using unreleased code.
-
-So, then you have two options:
-
-1. Download from NPM and have your codebase have dependencies foreign to foundry
-2. Download from the chainlink-brownie-contracts repo which already downloads from npm and then packages it nicely for you to use in foundry.
+1. Download from the chainlink-brownie-contracts repo which already downloads from npm and then packages it nicely for you to use in foundry.
 ## Summary
 1. That is an official repo maintained by the same org
 2. It downloads from the official release cycle `chainlink/contracts` use (npm) and packages it nicely for digestion from foundry.
