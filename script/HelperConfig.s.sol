@@ -1,55 +1,77 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
-import {Script} from "forge-std/Script.sol";
-import {MockV3Aggregator} from "lib/chainlink-brownie-contracts/contracts/src/v0.8/tests/MockV3Aggregator.sol";
+import {Script, console2} from "forge-std/Script.sol";
+import {MockV3Aggregator} from "@chainlink/contracts/v0.8/tests/MockV3Aggregator.sol";
 
-contract HelperConfig is Script {
-    NetworkConfig public activeNetworkConfig;
-    uint8 constant DECIMALS = 8;
-    int256 constant INITIAL_PRICE = 2000e8;
+abstract contract CodeConstants {
+    uint8 public constant DECIMALS = 8;
+    int256 public constant INITIAL_PRICE = 2000e8;
+
+    uint256 public constant ETH_SEPOLIA_CHAIN_ID = 11155111;
+    uint256 public constant ZKSYNC_SEPOLIA_CHAIN_ID = 300;
+    uint256 public constant LOCAL_CHAIN_ID = 31337;
+}
+
+contract HelperConfig is CodeConstants, Script {
+    error HelperConfig__InvalidChainId();
+    mapping(uint256 chainId => NetworkConfig) networkConfigs;
+
+    NetworkConfig public localNetworkConfig;
+
     struct NetworkConfig {
-        address priceFeed; // Network Price Feed Addresses
+        address priceFeed;
     }
 
     constructor() {
-        if (block.chainid == 11155111) {
-            activeNetworkConfig = getSepoliaEthConfig();
-        } else if (block.chainid == 1) {
-            activeNetworkConfig = getEthMainnetConfig();
+        networkConfigs[ETH_SEPOLIA_CHAIN_ID] = getSepoliaEthConfig();
+        networkConfigs[ZKSYNC_SEPOLIA_CHAIN_ID] = getZkSyncSepoliaEthConfig();
+    }
+
+    function getNetworkConfigByChainId(
+        uint256 chainId
+    ) public returns (NetworkConfig memory) {
+        if (networkConfigs[chainId].priceFeed != address(0)) {
+            return networkConfigs[chainId];
+        } else if (chainId == 31337) {
+            return getOrCreateAnvilEthConfig();
         } else {
-            activeNetworkConfig = getOrCreateAnvilConfig();
+            revert HelperConfig__InvalidChainId();
         }
     }
 
     function getSepoliaEthConfig() public pure returns (NetworkConfig memory) {
-        //Price Feed
-        NetworkConfig memory sepoliaConfig = NetworkConfig({
+        NetworkConfig memory sepoliaEthConfig = NetworkConfig({
             priceFeed: 0x694AA1769357215DE4FAC081bf1f309aDC325306
         });
-        return sepoliaConfig;
+        return sepoliaEthConfig;
     }
 
-    function getEthMainnetConfig() public pure returns (NetworkConfig memory) {
-        //Price Feed
-        NetworkConfig memory ethConfig = NetworkConfig({
-            priceFeed: 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419
+    function getZkSyncSepoliaEthConfig()
+        public
+        pure
+        returns (NetworkConfig memory)
+    {
+        NetworkConfig memory zkSyncSepoliaEthConfig = NetworkConfig({
+            priceFeed: 0xfEefF7c3fB57d18C5C6Cdd71e45D2D0b4F9377bF
         });
-        return ethConfig;
+        return zkSyncSepoliaEthConfig;
     }
 
-    function getOrCreateAnvilConfig() public returns (NetworkConfig memory) {
-        if (activeNetworkConfig.priceFeed != address(0)) {
-            return activeNetworkConfig;
+    function getOrCreateAnvilEthConfig() public returns (NetworkConfig memory) {
+        if (localNetworkConfig.priceFeed != address(0)) {
+            return localNetworkConfig;
         }
-        //Deploy Mock
-        MockV3Aggregator anvilEthConfig = new MockV3Aggregator(
+        console2.log(unicode"⚠️ You have deployed a mock contract!");
+        console2.log("Make sure this was intentional");
+        vm.startBroadcast();
+        MockV3Aggregator mockV3Aggregator = new MockV3Aggregator(
             DECIMALS,
             INITIAL_PRICE
         );
-        //Price Feed
-        NetworkConfig memory anvilEth = NetworkConfig({
-            priceFeed: address(anvilEthConfig)
+        vm.stopBroadcast();
+        localNetworkConfig = NetworkConfig({
+            priceFeed: address(mockV3Aggregator)
         });
-        return anvilEth;
+        return localNetworkConfig;
     }
 }

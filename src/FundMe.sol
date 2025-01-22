@@ -40,10 +40,6 @@ contract FundMe {
         s_funders.push(msg.sender);
     }
 
-    function getVersion() public view returns (uint256) {
-        return s_priceFeed.version();
-    }
-
     modifier onlyOwner() {
         // require(msg.sender == owner);
         if (msg.sender != i_owner) revert FundMe__NotOwner();
@@ -97,6 +93,11 @@ contract FundMe {
     }
 
     // view, pure (Getter functions)
+
+    function getVersion() public view returns (uint256) {
+        return s_priceFeed.version();
+    }
+
     function getAddressToAmountFunded(
         address funder
     ) public view returns (uint256) {
@@ -109,5 +110,9 @@ contract FundMe {
 
     function getOwner() public view returns (address) {
         return i_owner;
+    }
+
+    function getPriceFeed() public view returns (address) {
+        return address(s_priceFeed);
     }
 }

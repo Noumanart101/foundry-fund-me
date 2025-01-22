@@ -5,13 +5,19 @@ import {FundMe} from "../src/FundMe.sol";
 import {HelperConfig} from "./HelperConfig.s.sol";
 
 contract DeployFundMe is Script {
-    HelperConfig helperConfig = new HelperConfig();
-    address ethPriceFeedAddress = helperConfig.activeNetworkConfig();
+    function deployFundMe() public returns (FundMe, HelperConfig) {
+        HelperConfig helperConfig = new HelperConfig();
+        address priceFeed = helperConfig
+            .getNetworkConfigByChainId(block.chainid)
+            .priceFeed;
 
-    function run() external returns (FundMe) {
         vm.startBroadcast();
-        FundMe fundMe = new FundMe(ethPriceFeedAddress);
+        FundMe fundMe = new FundMe(priceFeed);
         vm.stopBroadcast();
-        return fundMe;
+        return (fundMe, helperConfig);
+    }
+
+    function run() external returns (FundMe, HelperConfig) {
+        return deployFundMe();
     }
 }
